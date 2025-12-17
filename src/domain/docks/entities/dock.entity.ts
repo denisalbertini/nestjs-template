@@ -1,0 +1,46 @@
+import { Transform } from 'class-transformer';
+import { Bike } from 'src/domain/bikes/entities/bike.entity';
+import { Rental } from 'src/domain/rentals/entities/rental.entity';
+import { Station } from 'src/domain/stations/entities/station.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { DockStatus } from '../enums/dock-status.enum';
+
+@Entity()
+export class Dock {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column('char', { length: 6, unique: true })
+  dockSerial: string;
+
+  @Column('varchar', { length: 100 })
+  model: string;
+
+  @Column('timestamptz')
+  @Transform(({ value }) => value.toISOString(), { toPlainOnly: true })
+  manufactureDate: Date;
+
+  @Column('enum', { enum: DockStatus, default: DockStatus.OPERATIONAL })
+  status: DockStatus;
+
+  @OneToOne(() => Bike, (bike) => bike.dock)
+  @JoinColumn()
+  bike?: Bike;
+
+  @ManyToOne(() => Station, (station) => station.docks)
+  station?: Station;
+
+  @OneToMany(() => Rental, (rental) => rental.rentedFromDock)
+  rentals?: Rental[];
+
+  @OneToMany(() => Rental, (rental) => rental.retunedToDock)
+  returns?: Rental[];
+}
