@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { AbstractHttpAdapter } from '@nestjs/core';
-import { HttpError } from 'express-openapi-validator/dist/framework/types';
 import { EntityNotFoundError, QueryFailedError, TypeORMError } from 'typeorm';
 
 @Catch()
@@ -27,17 +26,13 @@ export class CustomFilter implements ExceptionFilter {
     this.reply(this.httpAdapter, ctx, this.mapException(exception));
   }
 
-  private mapException(exception: unknown): HttpException | HttpError {
+  private mapException(exception: unknown): HttpException {
     if (exception instanceof HttpException) {
       return exception;
     }
 
     if (exception instanceof TypeORMError) {
       return this.handleTypeORMError(exception);
-    }
-
-    if (exception instanceof HttpError) {
-      return this.handleHttpError(exception);
     }
 
     return this.handleUnknownException(exception);
@@ -87,26 +82,15 @@ export class CustomFilter implements ExceptionFilter {
     return new InternalServerErrorException('Database error occurred');
   }
 
-  private handleHttpError(exception: HttpError): HttpError {
-    return exception;
-  }
-
   private reply(
     httpAdapter: AbstractHttpAdapter,
     ctx: HttpArgumentsHost,
-    exception: HttpException | HttpError,
+    exception: HttpException,
   ) {
-    let body: string | object;
-    let statusCode: number;
-
-    if (exception instanceof HttpException) {
-      body = exception.getResponse();
-      statusCode = exception.getStatus();
-    } else {
-      body = exception;
-      statusCode = exception.status;
-    }
-
-    httpAdapter.reply(ctx.getResponse(), body, statusCode);
+    httpAdapter.reply(
+      ctx.getResponse(),
+      exception.getResponse(),
+      exception.getStatus(),
+    );
   }
 }
