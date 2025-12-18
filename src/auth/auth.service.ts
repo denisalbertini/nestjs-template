@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
@@ -21,7 +25,11 @@ export class AuthService {
       status: BikerStatus.ACTIVE,
     });
 
-    if (!biker || !(await bcrypt.compare(password, biker.password))) {
+    if (!biker) {
+      throw new NotFoundException();
+    }
+
+    if (!(await bcrypt.compare(password, biker.password))) {
       throw new UnauthorizedException();
     }
 
