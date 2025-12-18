@@ -29,22 +29,31 @@ export class Rental {
   @ManyToOne(() => Biker, (biker) => biker.rentals, { nullable: false })
   biker: Biker;
 
-  @ManyToOne(() => Bike, (bike) => bike.rentals, { nullable: false })
+  @ManyToOne(() => Bike, (bike) => bike.rentals, {
+    nullable: false,
+    cascade: true,
+  })
   bike: Bike;
 
-  @ManyToOne(() => Dock, (dock) => dock.rentals, { nullable: false })
+  @ManyToOne(() => Dock, (dock) => dock.rentals, {
+    nullable: false,
+    cascade: true,
+  })
   @JoinColumn({ name: 'rented_from_dock_id' })
   rentedFromDock: Dock;
 
-  @ManyToOne(() => Dock, (dock) => dock.returns)
+  @ManyToOne(() => Dock, (dock) => dock.returns, { cascade: true })
   @JoinColumn({ name: 'returned_to_dock_id' })
   retunedToDock: Dock | null;
 
-  @OneToOne(() => Charge, (charge) => charge.rentals, { nullable: false })
+  @OneToOne(() => Charge, (charge) => charge.rental, {
+    nullable: false,
+    cascade: true,
+  })
   @JoinColumn({ name: 'initial_charge_id' })
   initialCharge: Charge;
 
-  @OneToOne(() => Charge, (charge) => charge.extras)
+  @OneToOne(() => Charge, (charge) => charge.extra, { cascade: true })
   @JoinColumn({ name: 'extra_charge_id' })
   extraCharge?: Charge;
 }

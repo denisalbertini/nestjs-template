@@ -1,7 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/constants';
-import { DataSource, IsNull, Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Biker } from '../bikers/entities/biker.entity';
 import { Bike } from '../bikes/entities/bike.entity';
 import { BikeStatus } from '../bikes/enums/bike-status.enum';
@@ -13,13 +17,10 @@ import { Rental } from './entities/rental.entity';
 @Injectable()
 export class RentalsService {
   constructor(
-    private readonly dataSource: DataSource,
     @InjectRepository(Biker)
     private readonly bikersRepository: Repository<Biker>,
     @InjectRepository(Bike)
     private readonly bikesRepository: Repository<Bike>,
-    @InjectRepository(Charge)
-    private readonly chargesRepository: Repository<Charge>,
     @InjectRepository(Dock)
     private readonly docksRepository: Repository<Dock>,
     @InjectRepository(Rental)
@@ -28,41 +29,122 @@ export class RentalsService {
 
   async create(
     bikerId: string,
-    dockSerial: string,
     bikeSerial: string,
-  ): Promise<void> {
-    const errors: Array<string> = [];
+    dockSerial: string,
+  ): Promise<Rental> {
+    const charge = new Charge();
+    const rental = new Rental();
 
-    if (!(await this.bikersRepository.count({ where: { id: bikerId } }))) {
-      errors.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Biker.name));
+    const errorMessages: Array<string> = [];
+
+    const biker = await this.bikersRepository.findOneBy({ id: bikerId });
+
+    if (!biker) {
+      errorMessages.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Biker.name));
     } else if (
       await this.rentalsRepository
         .createQueryBuilder('rental')
-        .where('rental.finishedAt = :finishedAt', { finishedAt: IsNull() })
-        .andWhere('rental.bikerId = :bikerId', { bikerId })
+        .where('rental.finished_at IS NULL')
+        .andWhere('rental.biker_id = :bikerId', { bikerId })
         .getExists()
     ) {
-      errors.push(ERROR_MESSAGES.BIKER.RENTING);
-    }
-
-    const dock = await this.docksRepository.findOneBy({ dockSerial });
-
-    if (!dock) {
-      errors.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Dock.name));
-    } else if (dock.status !== DockStatus.OCCUPIED) {
-      errors.push(ERROR_MESSAGES.SHARED.INVALID_STATUS(Dock.name));
+      errorMessages.push(ERROR_MESSAGES.BIKER.RENTING);
+    } else {
+      charge.requestedAt = new Date();
+      charge.biker = biker;
+      rental.biker = biker;
     }
 
     const bike = await this.bikesRepository.findOneBy({ bikeSerial });
 
     if (!bike) {
-      errors.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Bike.name));
+      errorMessages.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Bike.name));
     } else if (bike.status !== BikeStatus.AVAILABLE) {
-      errors.push(ERROR_MESSAGES.SHARED.INVALID_STATUS(Bike.name));
+      errorMessages.push(ERROR_MESSAGES.SHARED.INVALID_STATUS(Bike.name));
+    } else {
+      bike.status = BikeStatus.RENTED;
+      rental.bike = bike;
     }
 
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
+    const dock = await this.docksRepository.findOneBy({ dockSerial });
+
+    if (!dock) {
+      errorMessages.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Dock.name));
+    } else if (dock.status !== DockStatus.OCCUPIED) {
+      errorMessages.push(ERROR_MESSAGES.SHARED.INVALID_STATUS(Dock.name));
+    } else {
+      dock.status = DockStatus.AVAILABLE;
+      rental.rentedFromDock = dock;
     }
+
+    if (errorMessages.length > 0) {
+      throw new BadRequestException(errorMessages);
+    }
+
+    // Should have payment service right here
+    charge.completedAt = new Date();
+
+    rental.initialCharge = charge;
+
+    return await this.rentalsRepository.save(rental);
+  }
+
+  async registerReturn(
+    bikeSerial: string,
+    dockSerial: string,
+  ): Promise<Rental> {
+    const errorMessages: Array<string> = [];
+
+    const rental = await this.rentalsRepository.findOne({
+      where: { finishedAt: IsNull(), bike: { bikeSerial } },
+      relations: { biker: true, bike: true },
+    });
+
+    if (!rental) {
+      errorMessages.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Rental.name));
+    }
+
+    const dock = await this.docksRepository.findOneBy({ dockSerial });
+
+    if (!dock) {
+      errorMessages.push(ERROR_MESSAGES.SHARED.NOT_FOUND(Dock.name));
+    } else if (dock.status !== DockStatus.AVAILABLE) {
+      errorMessages.push(ERROR_MESSAGES.SHARED.INVALID_STATUS(Dock.name));
+    }
+
+    if (errorMessages.length > 0) {
+      throw new BadRequestException(errorMessages);
+    }
+
+    // Don't know a better way to deal with type safety
+    if (!rental || !dock) {
+      throw new InternalServerErrorException(
+        'Unexpected null values after validation',
+      );
+    }
+
+    const elapsedHours =
+      (Date.now() - rental.startedAt.getTime()) / (1000 * 60 * 60);
+
+    if (elapsedHours > 2) {
+      const extraAmount = Math.ceil((elapsedHours - 2) / 0.5) * 5;
+
+      const extraCharge = new Charge();
+      extraCharge.requestedAt = new Date();
+      extraCharge.amount = extraAmount;
+      extraCharge.biker = rental.biker;
+
+      // Should have payment service right here
+      extraCharge.completedAt = new Date();
+
+      rental.extraCharge = extraCharge;
+    }
+
+    dock.status = DockStatus.OCCUPIED;
+    rental.bike.status = BikeStatus.AVAILABLE;
+    rental.retunedToDock = dock;
+    rental.finishedAt = new Date();
+
+    return await this.rentalsRepository.save(rental);
   }
 }

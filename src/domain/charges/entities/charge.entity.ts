@@ -21,14 +21,14 @@ export class Charge {
   completedAt: Date | null;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  amount: number;
+  amount: number = 10;
 
   @ManyToOne(() => Biker, (biker) => biker.charges, { nullable: false })
   biker: Biker;
 
   @OneToOne(() => Rental, (rental) => rental.initialCharge)
-  rentals: Rental[];
+  rental: Rental;
 
   @OneToOne(() => Rental, (rental) => rental.extraCharge)
-  extras: Rental[];
+  extra: Rental;
 }

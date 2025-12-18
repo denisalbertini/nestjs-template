@@ -68,9 +68,11 @@ export class CustomFilter implements ExceptionFilter {
           return new BadRequestException('Referenced resource does not exist');
 
         case '23502': // PostgreSQL not null violation
+          this.logger.error(exception.message, exception.stack);
           return new BadRequestException('Required field cannot be null');
 
         default:
+          this.logger.error(exception.message, exception.stack);
           return new UnprocessableEntityException('Database operation failed');
       }
     }
