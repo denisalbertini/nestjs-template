@@ -1,12 +1,12 @@
 import { OmitType, PartialType } from '@nestjs/swagger';
 import { ValidateIf } from 'class-validator';
-import { MatchPropertyValue } from 'src/custom-validation-decorators/match-property-value';
+import { MatchPropertyValue } from 'src/decorators/validation/match-property-value';
 import { CreateBikerDto } from './create-biker.dto';
 
 export class UpdateBikerDto extends PartialType(
   OmitType(CreateBikerDto, ['cpf', 'creditCard'] as const),
 ) {
-  @ValidateIf(o => o.password)
+  @ValidateIf((o) => o.password)
   @MatchPropertyValue('password')
   confirmationPassword?: string;
 }

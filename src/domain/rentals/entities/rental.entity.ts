@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
 import { Biker } from 'src/domain/bikers/entities/biker.entity';
 import { Bike } from 'src/domain/bikes/entities/bike.entity';
 import { Charge } from 'src/domain/charges/entities/charge.entity';
@@ -19,13 +19,11 @@ export class Rental {
   id: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  @Transform(({ value }) => value.toISOString(), { toPlainOnly: true })
+  @TransformDate()
   startedAt: Date;
 
   @Column('timestamptz', { nullable: true })
-  @Transform(({ value }) => (value ? value.toISOString() : value), {
-    toPlainOnly: true,
-  })
+  @TransformDate()
   finishedAt: Date | null;
 
   @ManyToOne(() => Biker, (biker) => biker.rentals, { nullable: false })

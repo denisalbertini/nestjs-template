@@ -1,6 +1,6 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
-import { Transform } from 'class-transformer';
+import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
 import { Charge } from 'src/domain/charges/entities/charge.entity';
 import { CreditCard } from 'src/domain/credit-cards/entities/credit-card.entity';
 import { Passport } from 'src/domain/passports/entities/passport.entity';
@@ -28,7 +28,7 @@ export class Biker {
   name: string;
 
   @Column('timestamptz')
-  @Transform(({ value }) => value.toISOString(), { toPlainOnly: true })
+  @TransformDate()
   birthDate: Date;
 
   @Column({ unique: true })
@@ -63,17 +63,16 @@ export class Biker {
   }
 
   papersPlease() {
+    let errorMessage = '';
+
     if (this.cpf && this.passport) {
-      throw new HttpException(
-        'Biker cannot have both cpf and passport',
-        HttpStatus.BAD_REQUEST,
-      );
+      errorMessage = 'Biker cannot have both cpf and passport';
+    } else if (!this.cpf && !this.passport) {
+      errorMessage = 'Biker must have either cpf or passport';
     }
-    if (!this.cpf && !this.passport) {
-      throw new HttpException(
-        'Biker must have either cpf or passport',
-        HttpStatus.BAD_REQUEST,
-      );
+
+    if (errorMessage) {
+      throw new BadRequestException(errorMessage);
     }
   }
 }

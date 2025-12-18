@@ -1,5 +1,5 @@
 import { ApiHideProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
 import { Biker } from 'src/domain/bikers/entities/biker.entity';
 import {
   Column,
@@ -21,7 +21,7 @@ export class Passport {
   countryCode: string;
 
   @Column('timestamptz')
-  @Transform(({ value }) => value.toISOString(), { toPlainOnly: true })
+  @TransformDate()
   expirationDate: Date;
 
   @ApiHideProperty()

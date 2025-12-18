@@ -1,4 +1,3 @@
-import { Transform } from 'class-transformer';
 import { Bike } from 'src/domain/bikes/entities/bike.entity';
 import { Rental } from 'src/domain/rentals/entities/rental.entity';
 import { Station } from 'src/domain/stations/entities/station.entity';
@@ -25,7 +24,6 @@ export class Dock {
   model: string;
 
   @Column('timestamptz')
-  @Transform(({ value }) => value.toISOString(), { toPlainOnly: true })
   manufactureDate: Date;
 
   @Column('enum', { enum: DockStatus, default: DockStatus.OPERATIONAL })
