@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import bcrypt from 'bcryptjs';
+import { instanceToPlain } from 'class-transformer';
 import { AppModule } from 'src/app.module';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AuthService } from 'src/auth/auth.service';
@@ -38,7 +38,7 @@ describe('Bikers (e2e)', () => {
       .useValue({ sendAccountConfirmation: () => true })
       .compile();
 
-    app = moduleFixture.createNestApplication({ bodyParser: false });
+    app = moduleFixture.createNestApplication();
     configureApp(app, false);
     await app.init();
 
@@ -69,7 +69,7 @@ describe('Bikers (e2e)', () => {
           await bikersRepository.save([bikerWithCpf, bikerWithPassport]);
         });
 
-        const createBikerDto = buildCreateBikerDto(buildCreateCreditCardDto());
+        const createBikerDto = buildCreateBikerDto();
 
         const testCases = [
           {
@@ -127,8 +127,8 @@ describe('Bikers (e2e)', () => {
               name: 'a',
               birthDate: '2077-06-15',
               email: 'test@address.com',
-              password: 'abcdef',
-              confirmationPassword: 'defabc',
+              password: 'abc',
+              confirmationPassword: 'def',
               creditCard: {
                 creditCardNumber: '123',
                 holderName: '123',
@@ -137,14 +137,16 @@ describe('Bikers (e2e)', () => {
               },
             },
             expectedErrors: [
-              'CPF is invalid',
-              'name must be longer than or equal to 2 characters',
-              'Birth date must represent an age between 12 and 100 years',
+              'cpf is invalid',
+              'name must have a length of 2 to 100 characters',
+              'birthDate must represent an age between 12 and 100 years',
+              'password must be longer than or equal to 6 characters',
               'confirmationPassword must match password',
-              'creditCard.Credit card number is invalid',
-              "creditCard.holderName must match /^[\\p{L}\\s'.-]+$/u regular expression",
-              'creditCard.Credit card is expired',
-              'creditCard.cvv must match /^\\d{3,4}$/ regular expression',
+              'creditCard.creditCardNumber is invalid',
+              'creditCard.holderName must have a length of 5 to 100 characters',
+              'creditCard.holderName must have only letters',
+              'creditCard.expirationDate is expired',
+              'creditCard.cvv is invalid',
             ],
           },
         ];
@@ -171,76 +173,61 @@ describe('Bikers (e2e)', () => {
       describe('200', () => {
         beforeEach(() => truncateAllTables(dataSource));
 
-        const createCreditCardDto = buildCreateCreditCardDto();
-        const createBikerDtoCpf = buildCreateBikerDto(
-          createCreditCardDto,
-          '30535151055',
-        );
-        const createBikerDtoPassport = buildCreateBikerDto(
-          createCreditCardDto,
-          undefined,
-          true,
-        );
+        const createBikerDtoCpf = buildCreateBikerDto('95624749090');
+        const createBikerDtoPassport = buildCreateBikerDto(undefined, true);
 
-        const creditCard = {
-          id: expect.any(String),
-          creditCardNumber: createCreditCardDto.creditCardNumber,
-          holderName: createCreditCardDto.holderName,
-          expirationDate: createCreditCardDto.expirationDate,
-        };
-        const bikerWithCpf = {
+        const expectedCpfBikerData = {
           id: expect.any(String),
           cpf: createBikerDtoCpf.cpf,
           name: createBikerDtoCpf.name,
-          birthDate: new Date(createBikerDtoCpf.birthDate).toISOString(),
+          birthDate: createBikerDtoCpf.birthDate.toISOString(),
           email: createBikerDtoCpf.email,
           password: expect.any(String),
           status: BikerStatus.PENDING,
-          creditCard,
+          creditCard: {
+            id: expect.any(String),
+            creditCardNumber: createBikerDtoCpf.creditCard.creditCardNumber,
+            holderName: createBikerDtoCpf.creditCard.holderName,
+            expirationDate: createBikerDtoCpf.creditCard.expirationDate,
+          },
         };
-        const bikerWithPassport = {
+
+        const expectedPassportBikerData = {
           id: expect.any(String),
           cpf: null,
           name: createBikerDtoPassport.name,
-          birthDate: new Date(createBikerDtoPassport.birthDate).toISOString(),
+          birthDate: createBikerDtoPassport.birthDate.toISOString(),
           email: createBikerDtoPassport.email,
           password: expect.any(String),
           status: BikerStatus.PENDING,
-          creditCard,
-          passport: {
-            ...createBikerDtoPassport.passport,
+          creditCard: {
             id: expect.any(String),
-            expirationDate: new Date(
-              createBikerDtoPassport.passport?.expirationDate ?? '',
-            ).toISOString(),
+            creditCardNumber:
+              createBikerDtoPassport.creditCard.creditCardNumber,
+            holderName: createBikerDtoPassport.creditCard.holderName,
+            expirationDate: createBikerDtoPassport.creditCard.expirationDate,
+          },
+          passport: {
+            id: expect.any(String),
+            passportNumber: createBikerDtoPassport.passport?.passportNumber,
+            countryCode: createBikerDtoPassport.passport?.countryCode,
+            expirationDate:
+              createBikerDtoPassport.passport?.expirationDate.toISOString(),
           },
         };
 
         const testCases = [
           {
             description: 'With CPF',
-            reqBody: createBikerDtoCpf,
-            expectedResBody: bikerWithCpf,
-            expectedRecord: {
-              ...bikerWithCpf,
-              birthDate: new Date(createBikerDtoCpf.birthDate),
-              passport: null,
-            },
+            reqBody: instanceToPlain(createBikerDtoCpf),
+            expectedResBody: expectedCpfBikerData,
+            expectedRecord: expect.objectContaining(expectedCpfBikerData),
           },
           {
             description: 'With passport',
-            reqBody: createBikerDtoPassport,
-            expectedResBody: bikerWithPassport,
-            expectedRecord: {
-              ...bikerWithPassport,
-              birthDate: new Date(bikerWithPassport.birthDate),
-              passport: {
-                ...bikerWithPassport.passport,
-                expirationDate: new Date(
-                  createBikerDtoPassport.passport?.expirationDate ?? '',
-                ),
-              },
-            },
+            reqBody: instanceToPlain(createBikerDtoPassport),
+            expectedResBody: expectedPassportBikerData,
+            expectedRecord: expect.objectContaining(expectedPassportBikerData),
           },
         ];
 
@@ -251,14 +238,14 @@ describe('Bikers (e2e)', () => {
               [method](path)
               .send(reqBody);
 
+            const record = await bikersRepository.findOne({
+              where: { email: reqBody.email },
+              relations: { creditCard: true },
+            });
+
             expect(res.body).toStrictEqual(expectedResBody);
             expect(res.status).toBe(201);
-            expect(
-              await bikersRepository.findOne({
-                where: { email: reqBody.email },
-                relations: ['creditCard'],
-              }),
-            ).toStrictEqual(expect.objectContaining(expectedRecord));
+            expect(instanceToPlain(record)).toStrictEqual(expectedRecord);
           },
         );
       });
@@ -326,8 +313,8 @@ describe('Bikers (e2e)', () => {
             reqBody: {
               name: 'a',
               birthDate: '2077-06-15',
-              password: 'abcdef',
-              confirmationPassword: 'defabc',
+              password: 'abc',
+              confirmationPassword: 'def',
               passport: {
                 passportNumber: 'abc',
                 expirationDate: '2000-06-15',
@@ -336,11 +323,12 @@ describe('Bikers (e2e)', () => {
             },
             expectedErrors: [
               'confirmationPassword must match password',
-              'name must be longer than or equal to 2 characters',
-              'Birth date must represent an age between 12 and 100 years',
-              'passport.passportNumber must match /^[A-Za-z0-9]{6,9}$/ regular expression',
-              'passport.countryCode must match /\\b[A-Z]{3}\\b/ regular expression',
-              'passport.Passport is expired',
+              'name must have a length of 2 to 100 characters',
+              'birthDate must represent an age between 12 and 100 years',
+              'password must be longer than or equal to 6 characters',
+              'passport.passportNumber is invalid',
+              'passport.countryCode is invalid',
+              'passport.passport is expired',
             ],
           },
         ];
@@ -364,26 +352,28 @@ describe('Bikers (e2e)', () => {
       });
 
       describe('200', () => {
-        const biker = buildCreateBikerDto(
-          buildCreateCreditCardDto(),
-          undefined,
-          true,
-        );
+        const {
+          name,
+          birthDate,
+          email,
+          password,
+          confirmationPassword,
+          passport,
+        } = buildCreateBikerDto(undefined, true);
 
-        const updatedBiker = {
+        const expectedUpdatedBikerData = {
           id: expect.any(String),
           cpf: null,
-          name: biker.name,
-          birthDate: new Date(biker.birthDate).toISOString(),
-          email: biker.email,
+          name: name,
+          birthDate: birthDate.toISOString(),
+          email: email,
           password: expect.any(String),
           status: BikerStatus.ACTIVE,
           passport: {
             id: expect.any(String),
-            ...biker.passport,
-            expirationDate: new Date(
-              biker.passport?.expirationDate ?? '',
-            ).toISOString(),
+            passportNumber: passport?.passportNumber,
+            countryCode: passport?.countryCode,
+            expirationDate: passport?.expirationDate.toISOString(),
           },
         };
 
@@ -391,24 +381,15 @@ describe('Bikers (e2e)', () => {
           {
             description: 'Full update',
             reqBody: {
-              name: biker.name,
-              birthDate: biker.birthDate,
-              email: biker.email,
-              password: biker.password,
-              confirmationPassword: biker.confirmationPassword,
-              passport: biker.passport,
+              name,
+              birthDate: birthDate.toISOString().split('T')[0],
+              email: email,
+              password: password,
+              confirmationPassword: confirmationPassword,
+              passport: passport,
             },
-            expectedResBody: updatedBiker,
-            expectedRecord: {
-              ...updatedBiker,
-              birthDate: new Date(biker.birthDate),
-              passport: {
-                id: expect.any(String),
-                ...biker.passport,
-                expirationDate: new Date(biker.passport?.expirationDate ?? ''),
-                biker: undefined,
-              },
-            },
+            expectedResBody: expectedUpdatedBikerData,
+            expectedRecord: expect.objectContaining(expectedUpdatedBikerData),
           },
         ];
 
@@ -420,11 +401,11 @@ describe('Bikers (e2e)', () => {
               .set('Authorization', 'Bearer token')
               .send(reqBody);
 
+            const record = await bikersRepository.findOneBy({ email });
+
             expect(res.body).toStrictEqual(expectedResBody);
             expect(res.status).toBe(200);
-            expect(
-              await bikersRepository.findOneBy({ email: biker.email }),
-            ).toStrictEqual(expect.objectContaining(expectedRecord));
+            expect(instanceToPlain(record)).toStrictEqual(expectedRecord);
           },
         );
       });
@@ -438,7 +419,7 @@ describe('Bikers (e2e)', () => {
     describe('GET', () => {
       const method = 'get';
 
-      describe('412', () => {
+      describe('404', () => {
         const creditCard = buildCreditCard();
         const biker = buildBiker(creditCard);
 
@@ -461,10 +442,11 @@ describe('Bikers (e2e)', () => {
             .send();
 
           expect(res.body).toStrictEqual({
-            message: 'Precondition Failed',
-            statusCode: 412,
+            error: 'Not Found',
+            message: 'Requested resource was not found',
+            statusCode: 404,
           });
-          expect(res.status).toBe(412);
+          expect(res.status).toBe(404);
         });
       });
 
@@ -610,7 +592,7 @@ describe('Bikers (e2e)', () => {
       const biker = buildBiker(creditCard);
 
       const password = 'secret';
-      biker.password = bcrypt.hashSync(password, 10);
+      biker.password = password;
 
       beforeAll(async () => {
         await truncateAllTables(dataSource);
@@ -618,12 +600,29 @@ describe('Bikers (e2e)', () => {
         await bikersRepository.save(biker);
       });
 
-      describe('401', () => {
+      describe('404', () => {
         const testCases = [
           {
             description: 'Account does not exist',
-            reqBody: { email: 'whatever@address.com', password: 'abcdef' },
+            reqBody: { email: 'whatever@address.com', password },
           },
+        ];
+
+        test.each(testCases)('$description', async ({ reqBody }) => {
+          const res = await request(app.getHttpServer())
+            [method](path)
+            .send(reqBody);
+
+          expect(res.body).toStrictEqual({
+            message: 'Not Found',
+            statusCode: 404,
+          });
+          expect(res.status).toBe(404);
+        });
+      });
+
+      describe('401', () => {
+        const testCases = [
           {
             description: 'Password does not match',
             reqBody: { email: biker.email, password: 'abcdef' },

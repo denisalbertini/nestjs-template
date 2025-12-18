@@ -9,95 +9,90 @@ import { CreatePassportDto } from 'src/domain/passports/dto/create-passport.dto'
 import { Passport } from 'src/domain/passports/entities/passport.entity';
 
 export function buildCreateCreditCardDto(): CreateCreditCardDto {
-  return {
-    creditCardNumber: faker.finance.creditCardNumber(),
-    holderName: faker.person.fullName(),
-    expirationDate: '06/77',
-    cvv: faker.finance.creditCardCVV(),
-  };
+  const createCreditCardDto = new CreateCreditCardDto();
+
+  createCreditCardDto.creditCardNumber = faker.finance.creditCardNumber();
+  createCreditCardDto.holderName = faker.person.fullName();
+  createCreditCardDto.expirationDate = '06/77';
+  createCreditCardDto.cvv = faker.finance.creditCardCVV();
+
+  return createCreditCardDto;
 }
 
-type CreditCardBody = Omit<CreditCard, 'bikers'>;
+export function buildCreditCard(): CreditCard {
+  const creditCard = new CreditCard();
 
-export function buildCreditCard(): CreditCardBody {
-  return {
-    id: faker.string.uuid(),
-    creditCardNumber: faker.finance.creditCardNumber(),
-    holderName: faker.person.fullName(),
-    expirationDate: '06/77',
-  };
+  creditCard.id = faker.string.uuid();
+  creditCard.creditCardNumber = faker.finance.creditCardNumber();
+  creditCard.holderName = faker.person.fullName();
+  creditCard.expirationDate = '06/77';
+
+  return creditCard;
 }
 
-type CreateBikerDtoBody = Omit<CreateBikerDto, 'birthDate' | 'passport'> & {
-  birthDate: string;
-  passport?: CreatePassportDtoBody;
-};
+export function buildCreatePassportDto(): CreatePassportDto {
+  const createPassportDto = new CreatePassportDto();
+
+  createPassportDto.passportNumber = RandExp.randexp(/[A-Za-z0-9]{6,9}/);
+  createPassportDto.countryCode = RandExp.randexp(/[A-Z]{3}/);
+  createPassportDto.expirationDate = new Date('2077-06-15');
+
+  return createPassportDto;
+}
+
+export function buildPassport(): Passport {
+  const passport = new Passport();
+
+  passport.id = faker.string.uuid();
+  passport.passportNumber = RandExp.randexp(/[A-Za-z0-9]{6,9}/);
+  passport.countryCode = RandExp.randexp(/[A-Z]{3}/);
+  passport.expirationDate = new Date('2077-06-15');
+
+  return passport;
+}
 
 export function buildCreateBikerDto(
-  creditCard: CreateCreditCardDto,
   cpf?: string,
   passport?: boolean,
-): CreateBikerDtoBody {
-  const pass = faker.internet.password();
+): CreateBikerDto {
+  const createBikerDto = new CreateBikerDto();
 
-  return {
-    name: faker.person.fullName(),
-    birthDate: '2000-06-15',
-    email: faker.internet.email(),
-    password: pass,
-    confirmationPassword: pass,
-    creditCard,
-    ...(cpf && { cpf }),
-    ...(passport && { passport: buildCreatePassportDto() }),
-  };
+  createBikerDto.name = faker.person.fullName();
+  createBikerDto.birthDate = new Date('2000-06-15');
+  createBikerDto.email = faker.internet.email();
+  createBikerDto.password = faker.internet.password();
+  createBikerDto.confirmationPassword = createBikerDto.password;
+  createBikerDto.creditCard = buildCreateCreditCardDto();
+
+  if (cpf) {
+    createBikerDto.cpf = cpf;
+  } else if (passport) {
+    createBikerDto.passport = buildCreatePassportDto();
+  }
+
+  return createBikerDto;
 }
-
-type BikerBody = Omit<
-  Biker,
-  'creditCard' | 'passport' | 'hashPassword' | 'papersPlease'
-> & { creditCard: CreditCardBody; passport?: PassportBody };
 
 export function buildBiker(
-  creditCard: CreditCardBody,
+  creditCard: CreditCard,
   cpf?: string,
   passport?: boolean,
-): BikerBody {
-  return {
-    id: faker.string.uuid(),
-    name: faker.person.fullName(),
-    birthDate: new Date('2000-06-15'),
-    email: faker.internet.email(),
-    password: RandExp.randexp(/\$2[aby]\$10\$[./A-Za-z0-9]{53}/),
-    status: BikerStatus.ACTIVE,
-    creditCard,
-    ...(cpf && { cpf }),
-    ...(passport && { passport: buildPassport() }),
-  };
-}
+): Biker {
+  const biker = new Biker();
 
-type CreatePassportDtoBody = Omit<CreatePassportDto, 'expirationDate'> & {
-  expirationDate: string;
-};
+  biker.id = faker.string.uuid();
+  biker.name = faker.person.fullName();
+  biker.birthDate = new Date('2000-06-15');
+  biker.email = faker.internet.email();
+  biker.password = RandExp.randexp(/\$2[aby]\$10\$[./A-Za-z0-9]{53}/);
+  biker.status = BikerStatus.ACTIVE;
+  biker.creditCard = creditCard;
 
-export function buildCreatePassportDto(): CreatePassportDtoBody {
-  return {
-    passportNumber: RandExp.randexp(/[A-Za-z0-9]{6,9}/),
-    countryCode: RandExp.randexp(/[A-Z]{3}/),
-    expirationDate: '2077-06-15',
-  };
-}
+  if (cpf) {
+    biker.cpf = cpf;
+  } else if (passport) {
+    biker.passport = buildPassport();
+  }
 
-function buildUpdatePassportDto() {
-  return buildCreatePassportDto();
-}
-
-type PassportBody = Omit<Passport, 'biker'>;
-
-export function buildPassport(): PassportBody {
-  return {
-    id: faker.string.uuid(),
-    passportNumber: RandExp.randexp(/[A-Za-z0-9]{6,9}/),
-    countryCode: RandExp.randexp(/[A-Z]{3}/),
-    expirationDate: new Date('2077-06-15'),
-  };
+  return biker;
 }
