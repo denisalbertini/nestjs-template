@@ -9,7 +9,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { instanceToPlain } from 'class-transformer';
 import { Public } from 'src/auth/auth.guard';
 import { CreateCreditCardDto } from '../credit-cards/dto/create-credit-card.dto';
 import { BikersService } from './bikers.service';
@@ -22,9 +21,8 @@ export class BikersController {
 
   @Public()
   @Post()
-  async create(@Body() createBikerDto: CreateBikerDto) {
-    const biker = await this.bikersService.create(createBikerDto);
-    return instanceToPlain(biker);
+  create(@Body() createBikerDto: CreateBikerDto) {
+    return this.bikersService.create(createBikerDto);
   }
 
   @Public()
@@ -37,8 +35,7 @@ export class BikersController {
   @ApiBearerAuth()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBikerDto: UpdateBikerDto) {
-    const biker = this.bikersService.update(id, updateBikerDto);
-    return instanceToPlain(biker);
+    return this.bikersService.update(id, updateBikerDto);
   }
 
   @ApiBearerAuth()

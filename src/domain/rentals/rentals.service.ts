@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TransformInstanceToPlain } from 'class-transformer';
 import { ERROR_MESSAGES } from 'src/constants';
 import { IsNull, Repository } from 'typeorm';
 import { Biker } from '../bikers/entities/biker.entity';
@@ -27,6 +28,7 @@ export class RentalsService {
     private readonly rentalsRepository: Repository<Rental>,
   ) {}
 
+  @TransformInstanceToPlain()
   async create(
     bikerId: string,
     bikeSerial: string,
@@ -89,6 +91,7 @@ export class RentalsService {
     return await this.rentalsRepository.save(rental);
   }
 
+  @TransformInstanceToPlain()
   async registerReturn(
     bikeSerial: string,
     dockSerial: string,
@@ -116,7 +119,6 @@ export class RentalsService {
       throw new BadRequestException(errorMessages);
     }
 
-    // Don't know a better way to deal with type safety
     if (!rental || !dock) {
       throw new InternalServerErrorException(
         'Unexpected null values after validation',

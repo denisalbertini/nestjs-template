@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TransformInstanceToPlain } from 'class-transformer';
 import { AuthService } from 'src/auth/auth.service';
 import { APP } from 'src/constants';
 import { EmailService } from 'src/email/email.service';
@@ -23,6 +24,7 @@ export class BikersService {
     private readonly emailService: EmailService,
   ) {}
 
+  @TransformInstanceToPlain()
   async create(createBikerDto: CreateBikerDto): Promise<Biker> {
     const biker = this.bikersRepository.create(createBikerDto);
     biker.papersPlease();
@@ -69,6 +71,7 @@ export class BikersService {
     await this.bikersRepository.save(biker);
   }
 
+  @TransformInstanceToPlain()
   async update(id: string, updateBikerDto: UpdateBikerDto): Promise<Biker> {
     const biker = await this.bikersRepository.findOneByOrFail({ id });
 
