@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransformInstanceToPlain } from 'class-transformer';
 import { AuthService } from 'src/auth/auth.service';
@@ -27,7 +27,12 @@ export class BikersService {
   @TransformInstanceToPlain()
   async create(createBikerDto: CreateBikerDto): Promise<Biker> {
     const biker = this.bikersRepository.create(createBikerDto);
-    biker.papersPlease();
+
+    try {
+      biker.papersPlease();
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
 
     const creditCard = this.creditCardsRepository.create(biker.creditCard);
 
@@ -44,12 +49,10 @@ export class BikersService {
 
         const savedBiker = await transactionalEntityManager.save(biker);
 
-        const emailToken = await this.authService.getEmailToken(savedBiker);
-
         await this.emailService.sendAccountConfirmation(
           savedBiker.id,
           savedBiker.email,
-          emailToken,
+          await this.authService.getEmailToken(savedBiker),
           emailHtml,
           APP.NAME,
         );

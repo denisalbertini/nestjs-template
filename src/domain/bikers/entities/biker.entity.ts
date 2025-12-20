@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
 import { Charge } from 'src/domain/charges/entities/charge.entity';
@@ -72,7 +71,7 @@ export class Biker {
     }
 
     if (errorMessage) {
-      throw new BadRequestException(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 }
