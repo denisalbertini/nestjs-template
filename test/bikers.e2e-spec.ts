@@ -39,7 +39,7 @@ describe('Bikers (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    configureApp(app, false);
+    configureApp(app);
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);

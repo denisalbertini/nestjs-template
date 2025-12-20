@@ -19,11 +19,11 @@ export class EmailService {
   constructor(private configService: ConfigService) {
     try {
       this.transporter = createTransport({
-        host: this.configService.get<string>('SMTP_HOST'),
-        port: this.configService.get<number>('SMTP_PORT'),
+        host: this.configService.get<string>('email.host'),
+        port: this.configService.get<number>('email.port'),
         auth: {
-          user: this.configService.get<string>('SMTP_USER'),
-          pass: this.configService.get<string>('SMTP_PASS'),
+          user: this.configService.get<string>('email.user'),
+          pass: this.configService.get<string>('email.pass'),
         },
       });
     } catch (error) {
