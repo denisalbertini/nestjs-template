@@ -8,7 +8,7 @@ Template NestJS project based on the Docked Bike Sharing System API. Full versio
 - npm (comes with Node.js)
 - PostgreSQL (17 or superior [can be replaced by other relational databases])
 
-## Instalation
+## Installation
 
 ```bash
 $ git clone https://github.com./denis-albertini/docked-bike-sharing-system-api-nestjs.git
@@ -56,4 +56,4 @@ $ npm run migration:generate
 
 ## Replacing the database
 
-To replace the database you have to **write a new environment variable with the desired connection url** and update the `src/config/database.config.ts` file by changing the `type` and `url` properties of the `dataSourceOptions` constant.
+To replace the database you have to **write a new environment variable with the desired connection url** and update the `src/config/database.config.ts` file by changing the `type` and `url` properties of the `dataSourceOptions` object.
