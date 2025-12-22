@@ -32,7 +32,7 @@ describe('Bikers (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideGuard(AuthGuard)
+      .overrideProvider(AuthGuard)
       .useValue({ canActivate: () => true })
       .overrideProvider(EmailService)
       .useValue({ sendAccountConfirmation: () => true })
