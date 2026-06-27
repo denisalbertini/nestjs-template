@@ -600,6 +600,27 @@ describe('Bikers (e2e)', () => {
         await bikersRepository.save(biker);
       });
 
+      describe('400', () => {
+        const testCases = [
+          {
+            description: 'Password does not match',
+            reqBody: { email: biker.email, password: 'abcdef' },
+          },
+        ];
+
+        test.each(testCases)('$description', async ({ reqBody }) => {
+          const res = await request(app.getHttpServer())
+            [method](path)
+            .send(reqBody);
+
+          expect(res.body).toStrictEqual({
+            message: 'Bad Request',
+            statusCode: 400,
+          });
+          expect(res.status).toBe(400);
+        });
+      });
+
       describe('404', () => {
         const testCases = [
           {
@@ -618,27 +639,6 @@ describe('Bikers (e2e)', () => {
             statusCode: 404,
           });
           expect(res.status).toBe(404);
-        });
-      });
-
-      describe('401', () => {
-        const testCases = [
-          {
-            description: 'Password does not match',
-            reqBody: { email: biker.email, password: 'abcdef' },
-          },
-        ];
-
-        test.each(testCases)('$description', async ({ reqBody }) => {
-          const res = await request(app.getHttpServer())
-            [method](path)
-            .send(reqBody);
-
-          expect(res.body).toStrictEqual({
-            message: 'Unauthorized',
-            statusCode: 401,
-          });
-          expect(res.status).toBe(401);
         });
       });
 

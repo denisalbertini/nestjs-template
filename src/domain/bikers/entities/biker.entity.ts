@@ -18,10 +18,10 @@ import { BikerStatus } from '../enums/biker-status.enum';
 @Entity()
 export class Biker {
   @PrimaryGeneratedColumn('uuid')
-  readonly id!: string;
+  id!: string;
 
   @Column('char', { length: 11, unique: true, nullable: true })
-  readonly cpf?: string;
+  cpf?: string;
 
   @Column('varchar', { length: 100 })
   name!: string;
