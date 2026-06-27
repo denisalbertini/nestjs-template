@@ -1,3 +1,4 @@
+import { configureApp } from '@config/app.config';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -5,7 +6,6 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
-import { configureApp } from './config/app.config';
 
 (async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(

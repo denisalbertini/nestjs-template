@@ -1,8 +1,22 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
-  "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": { "^.+\\.(t|j)s$": ["ts-jest"] },
-  "moduleNameMapper": { "^src/(.*)$": "<rootDir>/../src/$1" }
+  "moduleNameMapper": {
+    "^@app-module$": "<rootDir>/../src/app.module",
+    "^@constants$": "<rootDir>/../src/constants",
+    "^@auth/(.*)$": "<rootDir>/../src/auth/$1",
+    "^@config/(.*)$": "<rootDir>/../src/config/$1",
+    "^@decorators/(.*)$": "<rootDir>/../src/decorators/$1",
+    "^@bikers/(.*)$": "<rootDir>/../src/domain/bikers/$1",
+    "^@bikes/(.*)$": "<rootDir>/../src/domain/bikes/$1",
+    "^@charges/(.*)$": "<rootDir>/../src/domain/charges/$1",
+    "^@credit-cards/(.*)$": "<rootDir>/../src/domain/credit-cards/$1",
+    "^@docks/(.*)$": "<rootDir>/../src/domain/docks/$1",
+    "^@passports/(.*)$": "<rootDir>/../src/domain/passports/$1",
+    "^@rentals/(.*)$": "<rootDir>/../src/domain/rentals/$1",
+    "^@stations/(.*)$": "<rootDir>/../src/domain/stations/$1",
+    "^@email/(.*)$": "<rootDir>/../src/email/$1",
+    "^@filters/(.*)$": "<rootDir>/../src/filters/$1"
+  }
 }

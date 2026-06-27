@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@constants';
 import {
   registerDecorator,
   ValidationArguments,
@@ -5,7 +6,6 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { ERROR_MESSAGES } from 'src/constants';
 
 @ValidatorConstraint({ name: 'MatchPropertyValue', async: false })
 export class MatchPropertyValueConstraint

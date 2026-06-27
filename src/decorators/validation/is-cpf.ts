@@ -1,10 +1,10 @@
+import { ERROR_MESSAGES } from '@constants';
 import {
   registerDecorator,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { ERROR_MESSAGES } from 'src/constants';
 
 @ValidatorConstraint({ name: 'IsCpf', async: false })
 export class IsCpfConstraint implements ValidatorConstraintInterface {

@@ -26,7 +26,7 @@ export class EmailService {
           pass: this.configService.get<string>('email.pass'),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       throw new EmailError('Failed to create transporter.', error.message);
     }
   }
@@ -51,7 +51,7 @@ export class EmailService {
       };
 
       return await this.transporter.sendMail(mailOptions);
-    } catch (error) {
+    } catch (error: any) {
       throw new EmailError(
         'Failed to send account confirmation email.',
         error.message,

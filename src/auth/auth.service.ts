@@ -1,4 +1,7 @@
+import { Biker } from '@bikers/entities/biker.entity';
+import { BikerStatus } from '@bikers/enums/biker-status.enum';
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -6,8 +9,6 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
-import { Biker } from 'src/domain/bikers/entities/biker.entity';
-import { BikerStatus } from 'src/domain/bikers/enums/biker-status.enum';
 import { Repository } from 'typeorm';
 import { AccessPurpose } from './enums/access-purpose.enum';
 
@@ -30,7 +31,7 @@ export class AuthService {
     }
 
     if (!(await bcrypt.compare(password, biker.password))) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
 
     return {

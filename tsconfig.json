@@ -1,25 +1,35 @@
 {
   "compilerOptions": {
+    "strict": true,
     "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
-    "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "types": ["jest", "node"],
+    "paths": {
+      "@app-module": ["./src/app.module"],
+      "@constants": ["./src/constants"],
+      "@auth/*": ["./src/auth/*"],
+      "@config/*": ["./src/config/*"],
+      "@decorators/*": ["./src/decorators/*"],
+      "@bikers/*": ["./src/domain/bikers/*"],
+      "@bikes/*": ["./src/domain/bikes/*"],
+      "@charges/*": ["./src/domain/charges/*"],
+      "@credit-cards/*": ["./src/domain/credit-cards/*"],
+      "@docks/*": ["./src/domain/docks/*"],
+      "@passports/*": ["./src/domain/passports/*"],
+      "@rentals/*": ["./src/domain/rentals/*"],
+      "@stations/*": ["./src/domain/stations/*"],
+      "@email/*": ["./src/email/*"],
+      "@filters/*": ["./src/filters/*"]
+    }
   }
 }

@@ -1,12 +1,12 @@
+import { CreateBikerDto } from '@bikers/dto/create-biker.dto';
+import { Biker } from '@bikers/entities/biker.entity';
+import { BikerStatus } from '@bikers/enums/biker-status.enum';
+import { CreateCreditCardDto } from '@credit-cards/dto/create-credit-card.dto';
+import { CreditCard } from '@credit-cards/entities/credit-card.entity';
 import { faker } from '@faker-js/faker';
+import { CreatePassportDto } from '@passports/dto/create-passport.dto';
+import { Passport } from '@passports/entities/passport.entity';
 import RandExp from 'randexp';
-import { CreateBikerDto } from 'src/domain/bikers/dto/create-biker.dto';
-import { Biker } from 'src/domain/bikers/entities/biker.entity';
-import { BikerStatus } from 'src/domain/bikers/enums/biker-status.enum';
-import { CreateCreditCardDto } from 'src/domain/credit-cards/dto/create-credit-card.dto';
-import { CreditCard } from 'src/domain/credit-cards/entities/credit-card.entity';
-import { CreatePassportDto } from 'src/domain/passports/dto/create-passport.dto';
-import { Passport } from 'src/domain/passports/entities/passport.entity';
 
 export function buildCreateCreditCardDto(): CreateCreditCardDto {
   const createCreditCardDto = new CreateCreditCardDto();

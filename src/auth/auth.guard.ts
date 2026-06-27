@@ -1,3 +1,4 @@
+import { DECORATOR_KEY } from '@constants';
 import {
   CanActivate,
   ExecutionContext,
@@ -8,7 +9,6 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { DECORATOR_KEY } from 'src/constants';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

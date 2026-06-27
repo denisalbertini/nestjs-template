@@ -1,6 +1,6 @@
+import { Biker } from '@bikers/entities/biker.entity';
+import { TransformDate } from '@decorators/transformation/transform-date.decorator';
 import { ApiHideProperty } from '@nestjs/swagger';
-import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
-import { Biker } from 'src/domain/bikers/entities/biker.entity';
 import {
   Column,
   Entity,
@@ -12,20 +12,20 @@ import {
 @Entity()
 export class Passport {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('varchar', { length: 9, unique: true })
-  passportNumber: string;
+  passportNumber!: string;
 
   @Column('char', { length: 3 })
-  countryCode: string;
+  countryCode!: string;
 
   @Column('timestamptz')
   @TransformDate()
-  expirationDate: Date;
+  expirationDate!: Date;
 
   @ApiHideProperty()
   @OneToOne(() => Biker, (biker) => biker.passport, { nullable: false })
   @JoinColumn()
-  biker: Biker;
+  biker?: Biker;
 }

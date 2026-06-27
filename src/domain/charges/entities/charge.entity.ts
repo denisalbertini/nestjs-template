@@ -1,34 +1,20 @@
-import { Biker } from 'src/domain/bikers/entities/biker.entity';
-import { Rental } from 'src/domain/rentals/entities/rental.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Biker } from '@bikers/entities/biker.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Charge {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  requestedAt: Date;
+  readonly id!: string;
 
   @Column('timestamptz')
-  completedAt: Date | null;
+  readonly requestedAt!: Date;
+
+  @Column('timestamptz')
+  completedAt!: Date | null;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  amount: number = 10;
+  readonly amount: number = 10;
 
   @ManyToOne(() => Biker, (biker) => biker.charges, { nullable: false })
-  biker: Biker;
-
-  @OneToOne(() => Rental, (rental) => rental.initialCharge)
-  rental: Rental;
-
-  @OneToOne(() => Rental, (rental) => rental.extraCharge)
-  extra: Rental;
+  readonly biker?: Biker;
 }

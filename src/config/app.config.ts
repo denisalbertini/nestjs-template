@@ -1,7 +1,7 @@
+import { CustomFilter } from '@filters/custom.filter';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { CustomFilter } from 'src/filters/custom.filter';
 
 export function configureApp(app: INestApplication) {
   app.setGlobalPrefix('api');

@@ -1,8 +1,8 @@
-import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
-import { Biker } from 'src/domain/bikers/entities/biker.entity';
-import { Bike } from 'src/domain/bikes/entities/bike.entity';
-import { Charge } from 'src/domain/charges/entities/charge.entity';
-import { Dock } from 'src/domain/docks/entities/dock.entity';
+import { Biker } from '@bikers/entities/biker.entity';
+import { Bike } from '@bikes/entities/bike.entity';
+import { Charge } from '@charges/entities/charge.entity';
+import { TransformDate } from '@decorators/transformation/transform-date.decorator';
+import { Dock } from '@docks/entities/dock.entity';
 import {
   Column,
   CreateDateColumn,
@@ -16,44 +16,49 @@ import {
 @Entity()
 export class Rental {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   @TransformDate()
-  startedAt: Date;
+  startedAt!: Date;
 
   @Column('timestamptz', { nullable: true })
   @TransformDate()
-  finishedAt: Date | null;
+  finishedAt!: Date | null;
 
-  @ManyToOne(() => Biker, (biker) => biker.rentals, { nullable: false })
-  biker: Biker;
+  @ManyToOne(() => Biker, (biker) => biker.rentals, {
+    nullable: false,
+    eager: true,
+  })
+  biker!: Biker;
 
   @ManyToOne(() => Bike, (bike) => bike.rentals, {
     nullable: false,
-    cascade: true,
+    eager: true,
+    cascade: ['update'],
   })
-  bike: Bike;
+  bike!: Bike;
 
   @ManyToOne(() => Dock, (dock) => dock.rentals, {
     nullable: false,
-    cascade: true,
+    eager: true,
+    cascade: ['update'],
   })
   @JoinColumn({ name: 'rented_from_dock_id' })
-  rentedFromDock: Dock;
+  rentedFromDock!: Dock;
 
-  @ManyToOne(() => Dock, (dock) => dock.returns, { cascade: true })
-  @JoinColumn({ name: 'returned_to_dock_id' })
-  retunedToDock: Dock | null;
-
-  @OneToOne(() => Charge, (charge) => charge.rental, {
-    nullable: false,
-    cascade: true,
+  @ManyToOne(() => Dock, (dock) => dock.returns, {
+    eager: true,
+    cascade: ['update'],
   })
-  @JoinColumn({ name: 'initial_charge_id' })
-  initialCharge: Charge;
+  @JoinColumn({ name: 'returned_to_dock_id' })
+  retunedToDock!: Dock | null;
 
-  @OneToOne(() => Charge, (charge) => charge.extra, { cascade: true })
+  @OneToOne(() => Charge, { nullable: false, eager: true, cascade: ['update'] })
+  @JoinColumn({ name: 'initial_charge_id' })
+  initialCharge!: Charge;
+
+  @OneToOne(() => Charge, { eager: true, cascade: ['update'] })
   @JoinColumn({ name: 'extra_charge_id' })
   extraCharge?: Charge;
 }

@@ -1,3 +1,4 @@
+import { Public } from '@auth/auth.guard';
 import {
   Body,
   Controller,
@@ -9,7 +10,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { Public } from 'src/auth/auth.guard';
 import { CreateCreditCardDto } from '../credit-cards/dto/create-credit-card.dto';
 import { BikersService } from './bikers.service';
 import { CreateBikerDto } from './dto/create-biker.dto';

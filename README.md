@@ -1,4 +1,4 @@
-# Description
+# NestJS Template
 
 Template NestJS project based on the Docked Bike Sharing System API. Full version available at [this repository](https://github.com./denis-albertini/docked-bike-sharing-system-api).
 

@@ -1,5 +1,5 @@
-import { Dock } from 'src/domain/docks/entities/dock.entity';
-import { Rental } from 'src/domain/rentals/entities/rental.entity';
+import { Dock } from '@docks/entities/dock.entity';
+import { Rental } from '@rentals/entities/rental.entity';
 import {
   Column,
   Entity,
@@ -12,22 +12,22 @@ import { BikeStatus } from '../enums/bike-status.enum';
 @Entity()
 export class Bike {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('char', { length: 6, unique: true })
-  bikeSerial: string;
+  bikeSerial!: string;
 
   @Column('varchar', { length: 100 })
-  brand: string;
+  brand!: string;
 
   @Column('varchar', { length: 100 })
-  model: string;
+  model!: string;
 
   @Column('int')
-  manufactureYear: number;
+  manufactureYear!: number;
 
   @Column('enum', { enum: BikeStatus, default: BikeStatus.NEW })
-  status: BikeStatus;
+  status!: BikeStatus;
 
   @OneToOne(() => Dock, (dock) => dock.bike)
   dock?: Dock;

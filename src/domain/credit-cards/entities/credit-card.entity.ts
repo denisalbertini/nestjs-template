@@ -1,22 +1,22 @@
+import { Biker } from '@bikers/entities/biker.entity';
 import { ApiHideProperty } from '@nestjs/swagger';
-import { Biker } from 'src/domain/bikers/entities/biker.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class CreditCard {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('varchar', { length: 19, unique: true })
-  creditCardNumber: string;
+  creditCardNumber!: string;
 
   @Column('varchar', { length: 100 })
-  holderName: string;
+  holderName!: string;
 
   @Column('char', { length: 5 })
-  expirationDate: string;
+  expirationDate!: string;
 
   @ApiHideProperty()
-  @OneToMany(() => Biker, biker => biker.creditCard)
-  bikers: Biker[];
+  @OneToMany(() => Biker, (biker) => biker.creditCard)
+  bikers?: Biker[];
 }

@@ -1,6 +1,6 @@
-import { Bike } from 'src/domain/bikes/entities/bike.entity';
-import { Rental } from 'src/domain/rentals/entities/rental.entity';
-import { Station } from 'src/domain/stations/entities/station.entity';
+import { Bike } from '@bikes/entities/bike.entity';
+import { Rental } from '@rentals/entities/rental.entity';
+import { Station } from '@stations/entities/station.entity';
 import {
   Column,
   Entity,
@@ -15,19 +15,19 @@ import { DockStatus } from '../enums/dock-status.enum';
 @Entity()
 export class Dock {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('char', { length: 6, unique: true })
-  dockSerial: string;
+  dockSerial!: string;
 
   @Column('varchar', { length: 100 })
-  model: string;
+  model!: string;
 
   @Column('timestamptz')
-  manufactureDate: Date;
+  manufactureDate!: Date;
 
   @Column('enum', { enum: DockStatus, default: DockStatus.OPERATIONAL })
-  status: DockStatus;
+  status!: DockStatus;
 
   @OneToOne(() => Bike, (bike) => bike.dock)
   @JoinColumn()

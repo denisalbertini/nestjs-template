@@ -1,9 +1,9 @@
+import { Charge } from '@charges/entities/charge.entity';
+import { CreditCard } from '@credit-cards/entities/credit-card.entity';
+import { TransformDate } from '@decorators/transformation/transform-date.decorator';
+import { Passport } from '@passports/entities/passport.entity';
+import { Rental } from '@rentals/entities/rental.entity';
 import bcrypt from 'bcryptjs';
-import { TransformDate } from 'src/decorators/transformation/transform-date.decorator';
-import { Charge } from 'src/domain/charges/entities/charge.entity';
-import { CreditCard } from 'src/domain/credit-cards/entities/credit-card.entity';
-import { Passport } from 'src/domain/passports/entities/passport.entity';
-import { Rental } from 'src/domain/rentals/entities/rental.entity';
 import {
   BeforeInsert,
   Column,
@@ -18,31 +18,31 @@ import { BikerStatus } from '../enums/biker-status.enum';
 @Entity()
 export class Biker {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  readonly id!: string;
 
   @Column('char', { length: 11, unique: true, nullable: true })
-  cpf?: string;
+  readonly cpf?: string;
 
   @Column('varchar', { length: 100 })
-  name: string;
+  name!: string;
 
   @Column('timestamptz')
   @TransformDate()
-  birthDate: Date;
+  birthDate!: Date;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column('char', { length: 60 })
-  password: string;
+  password!: string;
 
   @Column('enum', { enum: BikerStatus, default: BikerStatus.PENDING })
-  status: BikerStatus;
+  status!: BikerStatus;
 
   @ManyToOne(() => CreditCard, (creditCard) => creditCard.bikers, {
     nullable: false,
   })
-  creditCard: CreditCard;
+  creditCard?: CreditCard;
 
   @OneToOne(() => Passport, (passport) => passport.biker, {
     eager: true,
@@ -51,10 +51,10 @@ export class Biker {
   passport?: Passport;
 
   @OneToMany(() => Charge, (charge) => charge.biker)
-  charges: Charge[];
+  charges?: Charge[];
 
   @OneToMany(() => Rental, (rental) => rental.biker)
-  rentals: Rental[];
+  rentals?: Rental[];
 
   @BeforeInsert()
   async hashPassword() {

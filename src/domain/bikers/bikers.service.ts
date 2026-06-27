@@ -1,9 +1,9 @@
+import { AuthService } from '@auth/auth.service';
+import { APP } from '@constants';
+import { EmailService } from '@email/email.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransformInstanceToPlain } from 'class-transformer';
-import { AuthService } from 'src/auth/auth.service';
-import { APP } from 'src/constants';
-import { EmailService } from 'src/email/email.service';
 import { DataSource, Repository } from 'typeorm';
 import { CreateCreditCardDto } from '../credit-cards/dto/create-credit-card.dto';
 import { CreditCard } from '../credit-cards/entities/credit-card.entity';
@@ -30,11 +30,11 @@ export class BikersService {
 
     try {
       biker.papersPlease();
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
 
-    const creditCard = this.creditCardsRepository.create(biker.creditCard);
+    const creditCard = this.creditCardsRepository.create(biker.creditCard!);
 
     const existingCreditCard = await this.creditCardsRepository.findOneBy({
       creditCardNumber: creditCard.creditCardNumber,
